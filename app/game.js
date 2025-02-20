@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { supabase } from '../lib/supabase';
 
 // Korttipakan luonti ja sekoitus
 const createDeck = () => {
@@ -60,6 +61,7 @@ const calculateHand = (hand) => {
 
 export default function Game() {
   const router = useRouter();
+  const { playerName } = useLocalSearchParams();
   const [deck, setDeck] = useState([]);
   const [playerHand, setPlayerHand] = useState([]);
   const [dealerHand, setDealerHand] = useState([]);
@@ -68,15 +70,72 @@ export default function Game() {
   const [stats, setStats] = useState({
     wins: 0,
     losses: 0,
-    draws: 0,
-    gamesPlayed: 0
+    draws: 0
   });
+  const [loading, setLoading] = useState(true);
 
-  // Pelin alustus
   useEffect(() => {
+    loadPlayerStats();
     initializeGame();
   }, []);
 
+  const loadPlayerStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('player_stats')
+        .select('*')
+        .eq('player_name', playerName)
+        .single();
+
+      if (error) throw error;
+      setStats(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      Alert.alert('Virhe', 'Tilastojen lataaminen epäonnistui');
+      router.replace('/');
+    }
+  };
+
+  const updatePlayerStats = async (result) => {
+    try {
+      const newStats = {
+        ...stats,
+        [result]: stats[result] + 1
+      };
+
+      const { error } = await supabase
+        .from('player_stats')
+        .update(newStats)
+        .eq('player_name', playerName);
+
+      if (error) throw error;
+      setStats(newStats);
+    } catch (error) {
+      console.error('Error updating stats:', error);
+      Alert.alert('Virhe', 'Tilastojen päivitys epäonnistui');
+    }
+  };
+
+  const updateStats = async (result) => {
+    let statKey;
+    switch (result) {
+      case 'win':
+        statKey = 'wins';
+        break;
+      case 'loss':
+        statKey = 'losses';
+        break;
+      case 'draw':
+        statKey = 'draws';
+        break;
+      default:
+        return;
+    }
+    await updatePlayerStats(statKey);
+  };
+
+  // Pelin alustus
   const initializeGame = () => {
     const newDeck = createDeck();
     if (newDeck.length < 4) return; // Varmistetaan että pakassa on tarpeeksi kortteja
@@ -93,29 +152,6 @@ export default function Game() {
 
   const startNewGame = () => {
     initializeGame();
-  };
-
-  const updateStats = (result) => {
-    setStats(prevStats => {
-      const newStats = {
-        ...prevStats,
-        gamesPlayed: prevStats.gamesPlayed + 1
-      };
-
-      switch (result) {
-        case 'win':
-          newStats.wins = prevStats.wins + 1;
-          break;
-        case 'loss':
-          newStats.losses = prevStats.losses + 1;
-          break;
-        case 'draw':
-          newStats.draws = prevStats.draws + 1;
-          break;
-      }
-
-      return newStats;
-    });
   };
 
   // Nosta kortti
@@ -177,8 +213,13 @@ export default function Game() {
   };
 
   const getWinPercentage = () => {
-    if (stats.gamesPlayed === 0) return 0;
-    return ((stats.wins / stats.gamesPlayed) * 100).toFixed(1);
+    const totalGamesExcludingDraws = stats.wins + stats.losses;
+    if (totalGamesExcludingDraws === 0) return 0;
+    return ((stats.wins / totalGamesExcludingDraws) * 100).toFixed(1);
+  };
+
+  const handleBackToHome = () => {
+    router.replace('/');
   };
 
   const renderCard = (card, index, isDealer = false) => {
@@ -204,6 +245,13 @@ export default function Game() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.playerName}>{playerName}</Text>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackToHome}>
+          <Text style={styles.backButtonText}>Vaihda pelaajaa</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>Voitot: {stats.wins}</Text>
         <Text style={styles.statsText}>Häviöt: {stats.losses}</Text>
@@ -243,7 +291,7 @@ export default function Game() {
               onPress={hit}
               disabled={deck.length === 0}
             >
-              <Text style={styles.buttonText}>Nosta</Text>
+              <Text style={styles.buttonText}>Ota Kortti</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.button, styles.standButton]} onPress={stand}>
               <Text style={styles.buttonText}>Jää</Text>
@@ -266,6 +314,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#2C3E50',
     padding: 20,
     justifyContent: 'space-between',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginBottom: 10,
+  },
+  playerName: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  backButton: {
+    backgroundColor: '#34495e',
+    padding: 8,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   statsContainer: {
     flexDirection: 'row',
