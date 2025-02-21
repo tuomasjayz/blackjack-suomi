@@ -1,20 +1,43 @@
-# Welcome to your Expo app 👋
+# Blackjack Peli
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Yksinkertainen Blackjack-korttipeli, joka on toteutettu React Nativella ja Expo-frameworkilla.
 
-## Get started
+## Ominaisuudet
 
-1. Install dependencies
+- Perinteinen Blackjack-pelimekaniikka
+- Pelaajatilastot (voitot, häviöt, tasapelit)
+- Tilastojen tallennus Supabase-tietokantaan
+- Responsiivinen käyttöliittymä
+- Tuki useille pelaajille
+
+## Asennus
+
+1. Asenna tarvittavat riippuvuudet:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Käynnistä kehitysympäristö:
 
    ```bash
-    npx expo start
+   npx expo start
    ```
+
+3. Pelaa sovellusta:
+- Expo Go -sovelluksella (kehitysversio)
+- Tai rakenna itsenäinen APK:
+
+   ```bash
+   eas build -p android --profile preview
+   ```
+
+## Teknologiat
+
+- React Native
+- Expo Router
+- Supabase (tietokanta)
+- React Native Polyfills
 
 In the output, you'll find options to open the app in a
 
