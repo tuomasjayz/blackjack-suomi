@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "Blackjack Peli",
-    "slug": "blackjack-peli",
+    "slug": "blackjack-peli-suomi",
+    "owner": "tuomasjay",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -14,7 +15,9 @@
     },
     "android": {
       "package": "com.blackjack.game",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [],
+      "jsEngine": "hermes"
     },
     "plugins": [
       "expo-router"
@@ -22,6 +25,11 @@
     "experiments": {
       "typedRoutes": true
     },
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "63590111-83f4-4242-8403-d90543567015"
+      }
+    }
   }
 }

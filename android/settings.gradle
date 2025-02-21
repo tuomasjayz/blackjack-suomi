@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'BlackjackPeli'
+rootProject.name = 'Blackjack Peli'
 
 dependencyResolutionManagement {
   versionCatalogs {

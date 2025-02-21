@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '../lib/supabase';
 
@@ -244,7 +244,7 @@ export default function Game() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
         <Text style={styles.playerName}>{playerName}</Text>
         <TouchableOpacity style={styles.backButton} onPress={handleBackToHome}>
@@ -304,7 +304,7 @@ export default function Game() {
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -312,8 +312,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#2C3E50',
+  },
+  contentContainer: {
     padding: 20,
-    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
